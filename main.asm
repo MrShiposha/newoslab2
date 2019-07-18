@@ -161,6 +161,16 @@ r_reentry:
     mov si, pm_exit_msg
     call r_print
 
+
+; Waiting for key...
+    hlt ; for ENTER up
+    hlt ; for down any key
+
+shutdown:
+    mov dx, 0x604
+    mov ax, 0x2000
+    out dx, ax
+
 halt:
     cli
     hlt
