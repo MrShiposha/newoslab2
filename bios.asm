@@ -3,6 +3,8 @@ TARGET_SEGMENT  equ SECOND_STAGE_ADDRESS
 TARGET_OFFSET   equ 0x0000
 START_BLOCK     equ 1 ; 0 == first block
 
+HDD_INDEX equ 0x80
+
 struc DiskAddressPacket
     size     resb 1 ; size of DAP, always 16 bytes (0x10)
     reserved resb 1 ; always 0
@@ -21,7 +23,7 @@ bios_check_extensions:
     push si
     mov ah, 0x41   ; BIOS function
     mov bx, 0x55aa ; func param (magic number)
-    mov dl, 0x80   ; HDD index
+    mov dl, HDD_INDEX
     int 0x13
     pop si
     pop bx
@@ -30,7 +32,7 @@ bios_check_extensions:
 
 bios_load_sectors:
     pusha
-    mov dl, 0x80 ; HDD index
+    mov dl, HDD_INDEX
     xor al, al
     mov ah, 0x42 ; Extended Read Sectors From Drive
     mov si, .bls_dap

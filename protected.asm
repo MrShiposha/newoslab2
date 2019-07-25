@@ -1,5 +1,3 @@
-%include "macro.asm"
-
 bits 32
 p_entry:
     mov ax, DATA_SEGMENT

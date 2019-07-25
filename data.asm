@@ -6,9 +6,6 @@ pm_msg:
 pm_msg_to_exit:
     db "Press enter for switch to real mode", 0
 
-pm_msg_entering_msg:
-    db "Switching to protected mode...", 0
-
 pm_exit_msg:
     db "Protected mode exited. Returned to real mode.", 0
 

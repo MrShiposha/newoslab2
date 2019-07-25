@@ -4,6 +4,7 @@ SIGNATURE_ADDRESS    equ BOOTLOADER_ADDRESS + BOOTLOADER_SIZE - 2
 SECOND_STAGE_ADDRESS equ SIGNATURE_ADDRESS + 2
 
 %include "gdt_decl.asm"
+%include "macro.asm"
 
 bits 16
 org BOOTLOADER_ADDRESS
@@ -12,6 +13,7 @@ r_entry:
     xor ax, ax
     mov ds, ax
     mov es, ax
+    mov ss, ax
     mov bp, STACK_SIZE
     mov sp, bp
 
@@ -24,7 +26,7 @@ r_entry:
     call r_clear_screen
     mov si, pm_msg_entering_msg
     call r_print
-
+    
     cli ; запрет маскируемых прерываний
     ; запрет немаскируемых прерываний
     in	al, 0x70
@@ -39,17 +41,26 @@ r_entry:
     in al, 0xa1
     mov [slave_int_mask], al
 
-    ; TODO ИЗУЧИТЬ
-    mov al, 0x11
+    ; PIC init -- сбросит маску.
+    mov al, 0x11 ; ICW1
     out 0x20, al
-    mov al, 0x20
+    out 0xa0, al
+
+    ; Map IRQ
+    mov al, 0x20 ; ICW2 for master
     out 0x21, al
+
+    mov al, 0x28 ; ICW for slave
+    out 0xa1, al
     
-    mov al, 4
+    mov al, 0x4 ; ICW3 for master
     out 0x21, al
-    mov al, 1
-    out 0x21, al 
-    ; /TODO
+    mov al, 0x2 ; ICW3 for master
+    out 0xa1, al
+
+    mov al, 0x1 ; ICW4
+    out 0x21, al
+    out 0xa1, al
 
     ; Запретим все прерывания в ведущем контроллере, кроме IRQ0 (таймер) и IRQ1(клавиатура)
     mov al, 0xFC
@@ -57,7 +68,7 @@ r_entry:
 
     ; запретим все прерывания в ведомом контроллере
     mov al, 0xFF
-    out 0xA1, al
+    out 0xa1, al
 
     lidt [idt_descriptor_base]
 
@@ -130,21 +141,32 @@ r_reentry:
     mov bp, STACK_SIZE
     mov sp, bp
 
-    ; перепрограммируем ведущий контроллер обратно на вектор 8 - смещение, по которому вызываются стандартные обработчики прерываний в реалмоде
-    mov	al, 0x11	; инициализация
-    out	0x20, al
-    mov	al, 8	; отправка смещения
-    out	0x21, al
-    mov	al, 4	; волшебные команды, "код - работай!"
-    out	0x21, al
-    mov	al, 1
-    out	0x21, al
+    ; PIC init -- сбросит маску.
+    mov al, 0x11 ; ICW1
+    out 0x20, al
+    out 0xa0, al
+
+    ; Map IRQ
+    mov al, 0x08 ; ICW2 for master
+    out 0x21, al
+
+    mov al, 0x70 ; ICW for slave
+    out 0xa1, al
+    
+    mov al, 0x4 ; ICW3 for master
+    out 0x21, al
+    mov al, 0x2 ; ICW3 for master
+    out 0xa1, al
+
+    mov al, 0x1 ; ICW4
+    out 0x21, al
+    out 0xa1, al
 
     ; восстанавливаем маски контроллеров прерываний
     mov	al, master_int_mask
     out 0x21, al
     mov	al, slave_int_mask
-    out	0xA1, al
+    out	0xa1, al
 
     lidt [r_idtr]
 
@@ -178,6 +200,9 @@ halt:
 %include "bios.asm"
 
 r_end:
+
+pm_msg_entering_msg:
+    db "Switching to protected mode...", 0
 
 no_bios_ext_msg:
     db "No BIOS extensions present.", 0
