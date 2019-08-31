@@ -50,12 +50,12 @@ r_entry:
     mov al, 0x20 ; ICW2 for master
     out 0x21, al
 
-    mov al, 0x28 ; ICW for slave
+    mov al, 0x28 ; ICW2 for slave
     out 0xa1, al
     
     mov al, 0x4 ; ICW3 for master
     out 0x21, al
-    mov al, 0x2 ; ICW3 for master
+    mov al, 0x2 ; ICW3 for slave
     out 0xa1, al
 
     mov al, 0x1 ; ICW4
@@ -150,12 +150,12 @@ r_reentry:
     mov al, 0x08 ; ICW2 for master
     out 0x21, al
 
-    mov al, 0x70 ; ICW for slave
+    mov al, 0x70 ; ICW2 for slave
     out 0xa1, al
     
     mov al, 0x4 ; ICW3 for master
     out 0x21, al
-    mov al, 0x2 ; ICW3 for master
+    mov al, 0x2 ; ICW3 for slave
     out 0xa1, al
 
     mov al, 0x1 ; ICW4
@@ -185,6 +185,7 @@ r_reentry:
 
 
 ; Waiting for key...
+    hlt ; for ENTER down (first)
     hlt ; for ENTER up
     hlt ; for down any key
 
@@ -209,9 +210,6 @@ no_bios_ext_msg:
 
 err_load_sectors_msg:
     db "Can't load sectors.", 0
-
-r_idtr:
-    dw 0x33f, 0, 0
 
 master_int_mask:
     db 0

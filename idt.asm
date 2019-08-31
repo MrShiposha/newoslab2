@@ -1,9 +1,9 @@
 struc i_descriptor
-    offs_l  resw 1 ; Адрес обработчика (0..15)
-    sel     resw 1 ; Селектора сегмента кода
-    counter resb 1 ; Счетчик, не используется
-    attr    resb 1 ; Атрибуты
-    offs_h  resw 1 ; Адрес обработчика (16..23)
+    offs_l   resw 1 ; Адрес обработчика (0..15)
+    sel      resw 1 ; Селектора сегмента кода
+    _reserved resb 1
+    attr     resb 1 ; Атрибуты
+    offs_h   resw 1 ; Адрес обработчика (16..23)
 endstruc
 
 struc idt_descriptor
@@ -17,7 +17,7 @@ i_dummys:
     istruc i_descriptor
         at offs_l,  dw (dummy_isr - p_entry)
         at sel,     dw CODE_32_SEGMENT
-        at counter, db 0x0
+        at _reserved, db 0x0
         at attr,    db 0x8E
         at offs_h,  dw 0x0
     iend
@@ -26,7 +26,7 @@ i_dummys:
     istruc i_descriptor
         at offs_l,  dw (timer_int - p_entry)
         at sel,     dw CODE_32_SEGMENT
-        at counter, db 0x0
+        at _reserved, db 0x0
         at attr,    db 0x8E
         at offs_h,  dw 0x0
     iend
@@ -34,7 +34,7 @@ i_dummys:
     istruc i_descriptor
         at offs_l,  dw (keyboard_int - p_entry)
         at sel,     dw CODE_32_SEGMENT
-        at counter, db 0x0
+        at _reserved, db 0x0
         at attr,    db 0x8E
         at offs_h,  dw 0x0
     iend
@@ -133,4 +133,9 @@ BACKSPACE_SCANCODE equ 0x0E
 idt_descriptor_base: istruc idt_descriptor
     at lim,  dw idt_end - idt_base - 1
     at base, dd idt_base
+iend
+
+r_idtr: istruc idt_descriptor
+    at lim,  dw 0x33f
+    at base, dd 0
 iend
