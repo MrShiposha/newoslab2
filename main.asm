@@ -36,7 +36,7 @@ r_entry:
     lgdt [gdt_descriptor_base]
 
     ; сохраним маски прерываний контроллеров
-    in al, 0x21 ; TODO обрати внимание на порты в методе!
+    in al, 0x21
     mov [master_int_mask], al
     in al, 0xa1
     mov [slave_int_mask], al
@@ -80,7 +80,7 @@ r_entry:
     mov eax, cr0
     or al, 0x1
     mov cr0, eax
-    jmp dword CODE_32_SEGMENT:0 ; :0 потому что это косвенный jmp
+    jmp dword CODE_32_SEGMENT:0 ; косвенный FAR jmp
 
 r_setcursor:
     ; dh <- row
