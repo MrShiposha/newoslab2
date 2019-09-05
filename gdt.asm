@@ -25,7 +25,7 @@ gdt_data: istruc descriptor
     at base_l, dw 0x0
     at base_m, db 0x0
     at access, db DATA_ACCESS
-    at flags,  db 0x0
+    at flags,  db 01000000b
     at base_h, db 0x0
 iend
 
@@ -34,7 +34,7 @@ gdt_stack: istruc descriptor
     at base_l, dw stack_base
     at base_m, db 0x0
     at access, db DATA_ACCESS
-    at flags,  db 0x0
+    at flags,  db 01000000b
     at base_h, db 0x0
 iend
 
@@ -43,7 +43,7 @@ gdt_video: istruc descriptor
     at base_l, dw 0x8000
     at base_m, db 0x0B
     at access, db DATA_ACCESS
-    at flags,  db 0x0
+    at flags,  db 01000000b
     at base_h, db 0x0
 iend
 
